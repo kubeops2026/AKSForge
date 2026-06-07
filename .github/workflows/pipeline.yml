@@ -1,0 +1,28 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - qa
+          - prod
+
+      deployAKS:
+        description: 'Deploy to AKS'
+        required: true
+        type: boolean
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print values
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Deploy AKS: ${{ inputs.deployAKS }}"
