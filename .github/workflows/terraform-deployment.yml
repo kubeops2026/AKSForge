@@ -1,0 +1,70 @@
+name: Terraform Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      module_version:
+        description: "Azure Artifact Module Version"
+        required: true
+        default: "1.0.11"
+
+env:
+  ORGANIZATION: sumisharma900905
+  PROJECT: kubeops
+  FEED: kubeops-terraform-module
+  PACKAGE_NAME: terraform-module
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Azure CLI Extension
+        run: |
+          az extension add --name azure-devops --yes
+
+      - name: Download Module From Azure Artifacts
+        env:
+          AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+        run: |
+
+          mkdir artifact
+
+          az artifacts universal download \
+            --organization https://dev.azure.com/${{ env.ORGANIZATION }} \
+            --scope project \
+            --project ${{ env.PROJECT }} \
+            --feed ${{ env.FEED }} \
+            --name ${{ env.PACKAGE_NAME }} \
+            --version ${{ github.event.inputs.module_version }} \
+            --path artifact
+
+      - name: Verify Download
+        run: |
+          ls -la artifact
+
+      - name: Extract Module
+        run: |
+          unzip artifact/*.zip -d module
+
+      - name: Verify Extraction
+        run: |
+          find module -type f
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: IAC
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: module
+        run: terraform validate
+
+      # - name: Terraform Plan
+      #   working-directory: module
+      #   run: terraform plan
