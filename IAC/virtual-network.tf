@@ -1,5 +1,5 @@
 module "vnet" {
-    source = "./module/parent-module/vnet/"
+    source = ".\terraform-module-v1.0.11\child-module\vnet"
     resource_group_name = var.resource_group_name
 
   location = var.location
