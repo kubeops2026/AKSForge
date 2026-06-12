@@ -59,6 +59,14 @@ jobs:
           find . -type d
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+      - name: Show Terraform Files
+        run: |
+          echo "===== virtual-network.tf ====="
+          cat IAC/virtual-network.tf
+      - name: Verify Module Path
+        run: |
+          pwd
+          ls -la module/child-module/vnet
 
       - name: Terraform Init
         working-directory: IAC
