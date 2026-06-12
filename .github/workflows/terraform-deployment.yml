@@ -53,7 +53,10 @@ jobs:
       - name: Verify Extraction
         run: |
           find module -type f
-
+      - name: Show Folder Structure
+        run: |
+          pwd
+          find . -type d
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
