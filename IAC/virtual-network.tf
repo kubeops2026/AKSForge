@@ -1,5 +1,5 @@
 module "vnet" {
-    source = "./child-module/vnet"
+    source = "../module/child-module/vnet"
     resource_group_name = var.resource_group_name
 
   location = var.location
