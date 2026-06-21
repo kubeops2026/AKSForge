@@ -6,6 +6,7 @@ module "aks" {
     sku_tier            = var.sku_tier
     network_profile     = var.network_profile
     default_node_pool         = var.default_node_pool
+    dns_prefix                = var.dns_prefix
     
 
 }
