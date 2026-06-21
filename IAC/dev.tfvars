@@ -31,3 +31,4 @@ default_node_pool = {
   max_pods                    = 30
   only_critical_addons_enabled = false
 }
+dns_prefix = "AKSforge"
