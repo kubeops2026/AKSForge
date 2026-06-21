@@ -1,4 +1,4 @@
-name: Terraform Plan
+name: Terraform Deployment
 
 on:
   workflow_dispatch:
@@ -7,6 +7,19 @@ on:
         description: "Azure Artifact Module Version"
         required: true
         default: "1.0.11"
+
+      terraform_action:
+        description: "Terraform action to perform"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+        default: plan
+
+permissions:
+  id-token: write
+  contents: read
 
 env:
   ORGANIZATION: sumisharma900905
@@ -22,7 +35,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Azure CLI Extension
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Azure DevOps Extension
         run: |
           az extension add --name azure-devops --yes
 
@@ -30,8 +50,7 @@ jobs:
         env:
           AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
         run: |
-
-          mkdir artifact
+          mkdir -p artifact
 
           az artifacts universal download \
             --organization https://dev.azure.com/${{ env.ORGANIZATION }} \
@@ -43,39 +62,35 @@ jobs:
             --path artifact
 
       - name: Verify Download
-        run: |
-          ls -la artifact
+        run: ls -R artifact
 
       - name: Extract Module
         run: |
-          unzip artifact/*.zip -d module
+          mkdir -p module
+          unzip -o artifact/*.zip -d module
 
       - name: Verify Extraction
-        run: |
-          find module -type f
-      - name: Show Folder Structure
-        run: |
-          pwd
-          find . -type d
+        run: find module -type f
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-      - name: Show Terraform Files
-        run: |
-          echo "===== virtual-network.tf ====="
-          cat IAC/virtual-network.tf
-      - name: Verify Module Path
-        run: |
-          pwd
-          ls -la module/child-module/vnet
 
       - name: Terraform Init
         working-directory: IAC
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: module
+        working-directory: IAC
         run: terraform validate
 
-      # - name: Terraform Plan
-      #   working-directory: module
-      #   run: terraform plan
+      - name: Terraform Plan
+        if: github.event.inputs.terraform_action == 'plan'
+        working-directory: IAC
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: github.event.inputs.terraform_action == 'apply'
+        working-directory: IAC
+        run: |
+          terraform plan -out=tfplan
+          terraform apply -auto-approve tfplan
