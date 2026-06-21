@@ -1,3 +1,4 @@
+subscription_id = "550859a5-ee7e-4083-b41b-88d91e040ca0"
 resource_group_name = "AKS-Forge-RG"
 location = "eastus"
 vnet_name = "kubeops-aks-vnet"
