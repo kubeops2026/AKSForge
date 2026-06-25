@@ -69,13 +69,12 @@ variable "default_node_pool" {
   })
 }
 variable "network_profile" {
-
   type = object({
-    network_plugin      = string
-    network_policy      = optional(string)
-    dns_service_ip      = string
-    service_cidr        = string
-    load_balancer_sku   = string
-    outbound_type       = string
+    network_plugin    = optional(string, "azure")
+    load_balancer_sku = optional(string, "standard")
+    dns_service_ip    = optional(string)
+    service_cidr      = optional(string)
+    outbound_type     = optional(string, "loadBalancer")
   })
+  default = null # Isse poora block hi optional ho jata hai
 }
