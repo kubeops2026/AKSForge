@@ -29,7 +29,7 @@ default_node_pool = {
   max_count                   = 2
   enable_auto_scaling         = true
   os_disk_size_gb             = 64
-  max_pods                    = 30
+  max_pods                    = 32
   only_critical_addons_enabled = false
 }
 dns_prefix = "AKSforge"
