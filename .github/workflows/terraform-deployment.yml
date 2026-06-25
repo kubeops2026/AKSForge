@@ -21,11 +21,16 @@ permissions:
   id-token: write
   contents: read
 
+# FIX 1: Yahan par ARM_* variables ko map kar diya hai taaki poori workflow me har step (samet Terraform) ise use kar sake
 env:
   ORGANIZATION: sumisharma900905
   PROJECT: kubeops
   FEED: kubeops-terraform-module
   PACKAGE_NAME: terraform-module
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: true # FIX 2: Yeh Terraform ko batata hai ki OIDC use karna hai login ke liye
 
 jobs:
   terraform:
