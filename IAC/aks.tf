@@ -1,5 +1,6 @@
 module "aks" {
     source = "../module/child-module/aks"
+    depends_on = [module.vnet]
     resource_group_name = var.resource_group_name
     location            = var.location
     cluster_name        = var.cluster_name
