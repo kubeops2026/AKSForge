@@ -7,6 +7,7 @@ module "aks" {
     network_profile     = var.network_profile
     default_node_pool         = var.default_node_pool
     dns_prefix                = var.dns_prefix
+    local_account_disabled    = false
     
 
 }
