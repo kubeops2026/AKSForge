@@ -34,12 +34,12 @@ jobs:
       ########################################################
       # 2. Attach ACR to AKS (FIX for ImagePullBackOff)
       ########################################################
-      - name: Attach ACR to AKS
-        run: |
-          az aks update \
-            --name $AKS_CLUSTER \
-            --resource-group $RESOURCE_GROUP \
-            --attach-acr $ACR_NAME
+      # - name: Attach ACR to AKS
+      #   run: |
+      #     az aks update \
+      #       --name $AKS_CLUSTER \
+      #       --resource-group $RESOURCE_GROUP \
+      #       --attach-acr $ACR_NAME
 
       ########################################################
       # 3. Install kubectl
