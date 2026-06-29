@@ -1,6 +1,6 @@
 resource "azurerm_container_registry" "acr" {
   name                = aks-forge-acr   
-  resource_group_name = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
   sku           = "Standard"           # Basic, Standard, or Premium
