@@ -18,7 +18,7 @@ env:
   ACR_NAME: ${{ secrets.ACR_NAME }}
 
   IMAGE_NAME: frontend
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: latest   # ✅ FIX: use existing working tag
 
 jobs:
   deploy:
@@ -27,16 +27,14 @@ jobs:
     steps:
 
       ########################################################
-      # Checkout
+      # Checkout code
       ########################################################
-
       - name: Checkout Source
         uses: actions/checkout@v4
 
       ########################################################
-      # Azure Login
+      # Azure Login (OIDC)
       ########################################################
-
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -47,14 +45,12 @@ jobs:
       ########################################################
       # Install kubectl
       ########################################################
-
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
 
       ########################################################
-      # Get AKS Credentials
+      # Get AKS credentials
       ########################################################
-
       - name: Get AKS Credentials
         run: |
           az aks get-credentials \
@@ -63,33 +59,30 @@ jobs:
             --overwrite-existing
 
       ########################################################
-      # Replace Image Tag
+      # Update deployment image
       ########################################################
-
       - name: Update Deployment Image
         run: |
           sed -i "s|IMAGE_PLACEHOLDER|$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG|g" frontend/deployment.yaml
 
       ########################################################
-      # Deploy
+      # Deploy to AKS (FIXED)
       ########################################################
-
       - name: Apply Kubernetes Manifests
         run: |
-          kubectl apply -f frontend/
+          kubectl apply -f frontend/deployment.yaml
+          kubectl apply -f frontend/service.yaml
 
       ########################################################
-      # Verify Rollout
+      # Verify rollout
       ########################################################
-
       - name: Verify Deployment
         run: |
           kubectl rollout status deployment/frontend --timeout=300s
 
       ########################################################
-      # Show Resources
+      # Debug info
       ########################################################
-
       - name: Get Pods
         run: kubectl get pods
 
