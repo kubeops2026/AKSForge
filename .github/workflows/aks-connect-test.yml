@@ -45,3 +45,5 @@ jobs:
         run: |
           kubectl get nodes
           kubectl get pods -A
+          kubectl get pods
+          kubectl get svc
