@@ -1,7 +1,7 @@
 module "aks" {
     source = "../module/child-module/aks"
-    resource_group_name = var.resource_group_name
-    location            = var.location
+    resource_group_name = azurerm_resource_group.rg.name
+    location            = azurerm_resource_group.rg.location
     cluster_name        = var.cluster_name
     sku_tier            = var.sku_tier
     network_profile     = var.network_profile
