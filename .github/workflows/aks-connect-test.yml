@@ -10,6 +10,7 @@ permissions:
 env:
   RESOURCE_GROUP: AKS-Forge-RG
   AKS_CLUSTER: AKS-Forge
+  ACR_NAME: aksforgeacr
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
@@ -20,7 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      ########################################################
       # 1. Azure Login (OIDC)
+      ########################################################
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -28,11 +31,25 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # 2. Install kubectl
+      ########################################################
+      # 2. Attach ACR to AKS (FIX for ImagePullBackOff)
+      ########################################################
+      - name: Attach ACR to AKS
+        run: |
+          az aks update \
+            --name $AKS_CLUSTER \
+            --resource-group $RESOURCE_GROUP \
+            --attach-acr $ACR_NAME
+
+      ########################################################
+      # 3. Install kubectl
+      ########################################################
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
-      # 3. Get AKS credentials
+      ########################################################
+      # 4. Get AKS credentials
+      ########################################################
       - name: Get AKS credentials
         run: |
           az aks get-credentials \
@@ -40,11 +57,11 @@ jobs:
             --name $AKS_CLUSTER \
             --overwrite-existing
 
-      # 4. Verify cluster connection
+      ########################################################
+      # 5. Verify cluster access
+      ########################################################
       - name: Test cluster access
         run: |
           kubectl get nodes
           kubectl get pods -A
-          kubectl get pods
           kubectl get svc
-          kubectl describe pod frontend-75dbbb8c4c-2hrjz
