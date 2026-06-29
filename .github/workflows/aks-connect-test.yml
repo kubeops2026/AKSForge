@@ -47,3 +47,4 @@ jobs:
           kubectl get pods -A
           kubectl get pods
           kubectl get svc
+          kubectl describe pod frontend-75dbbb8c4c-2hrjz
