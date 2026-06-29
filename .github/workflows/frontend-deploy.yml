@@ -68,7 +68,7 @@ jobs:
 
       - name: Update Deployment Image
         run: |
-          sed -i "s|IMAGE_PLACEHOLDER|$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG|g" k8s/frontend/deployment.yaml
+          sed -i "s|IMAGE_PLACEHOLDER|$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG|g" frontend/deployment.yaml
 
       ########################################################
       # Deploy
