@@ -1,0 +1,97 @@
+name: Deploy Frontend to AKS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
+  AKS_CLUSTER: ${{ secrets.AKS_CLUSTER_NAME }}
+
+  ACR_NAME: ${{ secrets.ACR_NAME }}
+
+  IMAGE_NAME: frontend
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      ########################################################
+      # Checkout
+      ########################################################
+
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      ########################################################
+      # Azure Login
+      ########################################################
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      ########################################################
+      # Install kubectl
+      ########################################################
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      ########################################################
+      # Get AKS Credentials
+      ########################################################
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group $RESOURCE_GROUP \
+            --name $AKS_CLUSTER \
+            --overwrite-existing
+
+      ########################################################
+      # Replace Image Tag
+      ########################################################
+
+      - name: Update Deployment Image
+        run: |
+          sed -i "s|IMAGE_PLACEHOLDER|$ACR_NAME.azurecr.io/$IMAGE_NAME:$IMAGE_TAG|g" k8s/frontend/deployment.yaml
+
+      ########################################################
+      # Deploy
+      ########################################################
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f k8s/frontend/
+
+      ########################################################
+      # Verify Rollout
+      ########################################################
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/frontend --timeout=300s
+
+      ########################################################
+      # Show Resources
+      ########################################################
+
+      - name: Get Pods
+        run: kubectl get pods
+
+      - name: Get Services
+        run: kubectl get svc
